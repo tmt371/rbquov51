@@ -22,6 +22,9 @@ const COLUMN_CONFIG = {
     oi: { header: 'O/I', className: 'col-oi', dataColumn: 'oi', cellType: 'td' },
     lr: { header: 'L/R', className: 'col-lr', dataColumn: 'lr', cellType: 'td' },
     fabricTypeDisplay: { header: 'Type', className: 'col-type', dataColumn: 'fabricType', cellType: 'td' },
+    dual: { header: 'Dual', className: 'col-dual', dataColumn: 'dual', cellType: 'td' },
+    chain: { header: 'Chain', className: 'col-chain', dataColumn: 'chain', cellType: 'td' },
+    winder: { header: 'Winder', className: 'col-winder', dataColumn: 'winder', cellType: 'td' },
 };
 
 
@@ -146,6 +149,16 @@ export class TableComponent {
                 cell.textContent = item.fabricType || '';
                 if (item.fabricType === 'BO1') cell.classList.add('type-bo1');
                 else if (item.fabricType === 'SN') cell.classList.add('type-sn');
+                break;
+            case 'dual':
+                cell.textContent = item.dual || '';
+                cell.classList.toggle('dual-cell-active', item.dual === 'D');
+                break;
+            case 'chain':
+                cell.textContent = item.chain || '';
+                break;
+            case 'winder':
+                cell.textContent = item.winder || '';
                 break;
         }
     }

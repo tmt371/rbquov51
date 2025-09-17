@@ -10,7 +10,15 @@ export class DetailConfigView {
         this.eventAggregator = eventAggregator;
         this.publish = publishStateChangeCallback;
 
+        this.eventAggregator.subscribe('k4ModeChanged', (data) => this.handleK4ModeChange(data));
         console.log("DetailConfigView Initialized (Pure Logic View).");
+    }
+
+    handleK4ModeChange({ mode }) {
+        const currentMode = this.uiService.getState().k4ActiveMode;
+        const newMode = currentMode === mode ? null : mode;
+        this.uiService.setK4ActiveMode(newMode);
+        this.publish();
     }
 
     handleFocusModeRequest({ column }) {
@@ -189,11 +197,10 @@ export class DetailConfigView {
     }
 
     handleTableCellClick({ rowIndex, column }) {
-        const { activeEditMode } = this.uiService.getState();
+        const { activeEditMode, k4ActiveMode } = this.uiService.getState();
 
-        if (activeEditMode !== 'K3') return;
-
-        if (['over', 'oi', 'lr'].includes(column)) {
+        // K3 Mode Logic
+        if (activeEditMode === 'K3' && ['over', 'oi', 'lr'].includes(column)) {
             this.uiService.setActiveCell(rowIndex, column);
             this.quoteService.cycleK3Property(rowIndex, column);
             this.publish();
@@ -202,6 +209,21 @@ export class DetailConfigView {
                 this.uiService.setActiveCell(null, null);
                 this.publish();
             }, 150);
+        }
+
+        // K4 Mode Logic
+        if (k4ActiveMode === 'dual' && column === 'dual') {
+            const items = this.quoteService.getItems();
+            // Check if this item is a "linked" item (i.e., it's 'D' because the previous one is 'D')
+            if (rowIndex > 0) {
+                const previousItem = items[rowIndex - 1];
+                if (previousItem.dual === 'D') {
+                    // This is a linked item, do nothing as per the rule.
+                    return;
+                }
+            }
+            this.quoteService.toggleDualProperty(rowIndex);
+            this.publish();
         }
     }
 
