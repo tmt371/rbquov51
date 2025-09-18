@@ -149,23 +149,6 @@ export class QuoteService {
         return false;
     }
 
-    toggleDualProperty(rowIndex) {
-        const items = this._getItems();
-        const currentItem = items[rowIndex];
-        if (!currentItem) return false;
-
-        // Toggle the value between 'D' and ''
-        const newValue = currentItem.dual === 'D' ? '' : 'D';
-        currentItem.dual = newValue;
-
-        // Apply the N+1 chaining logic
-        const nextItem = items[rowIndex + 1];
-        if (nextItem) {
-            nextItem.dual = newValue;
-        }
-        return true;
-    }
-
     batchUpdateProperty(property, value) {
         const items = this._getItems();
         let changed = false;
@@ -270,7 +253,7 @@ export class QuoteService {
 
         sortedIndexes.forEach(index => {
             this.deleteRow(index);
-});
+        });
 
         this.consolidateEmptyRows();
     }

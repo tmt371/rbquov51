@@ -18,9 +18,6 @@ export class UIService {
         
         this.state.lfSelectedRowIndexes = new Set();
         this.state.lfModifiedRowIndexes = new Set();
-
-        this.state.k4ActiveMode = null; // 'dual', 'chain', or 'winder'
-        this.state.chainInputValue = '';
         
         console.log("UIService Initialized.");
     }
@@ -39,9 +36,6 @@ export class UIService {
         
         this.state.lfSelectedRowIndexes = new Set();
         this.state.lfModifiedRowIndexes = new Set();
-
-        this.state.k4ActiveMode = null;
-        this.state.chainInputValue = '';
     }
 
     setActiveCell(rowIndex, column) {
@@ -153,26 +147,5 @@ export class UIService {
     
     hasLFModifiedRows() {
         return this.state.lfModifiedRowIndexes.size > 0;
-    }
-
-    // --- [NEW] K4 State Management ---
-    setK4ActiveMode(mode) {
-        this.state.k4ActiveMode = mode;
-    }
-
-    setChainInputValue(value) {
-        this.state.chainInputValue = String(value || '');
-    }
-
-    appendChainInputValue(key) {
-        this.state.chainInputValue += key;
-    }
-
-    deleteLastChainInputChar() {
-        this.state.chainInputValue = this.state.chainInputValue.slice(0, -1);
-    }
-
-    clearChainInputValue() {
-        this.state.chainInputValue = '';
     }
 }

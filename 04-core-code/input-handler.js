@@ -81,18 +81,6 @@ export class InputHandler {
         setupBatchCycleButton('btn-batch-cycle-oi', 'oi');
         setupBatchCycleButton('btn-batch-cycle-lr', 'lr');
 
-        // --- [NEW] K4 Button Listeners ---
-        const setupK4Button = (buttonId, mode) => {
-            const button = document.getElementById(buttonId);
-            if (button) {
-                button.addEventListener('click', () => {
-                    this.eventAggregator.publish('k4ModeChanged', { mode });
-                });
-            }
-        };
-        setupK4Button('btn-k4-dual', 'dual');
-        setupK4Button('btn-k4-chain', 'chain');
-        setupK4Button('btn-k4-winder', 'winder');
 
         const returnButton = document.getElementById('btn-return-form1');
         if (returnButton) {

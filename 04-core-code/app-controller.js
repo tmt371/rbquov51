@@ -99,7 +99,7 @@ export class AppController {
             'k1-tab': ['sequence', 'fabricTypeDisplay', 'location'],
             'k2-tab': ['sequence', 'fabricTypeDisplay', 'fabric', 'color'],
             'k3-tab': ['sequence', 'fabricTypeDisplay', 'location', 'over', 'oi', 'lr'],
-            'k4-tab': ['sequence', 'fabricTypeDisplay', 'location', 'dual', 'chain', 'winder'],
+            'k4-tab': ['sequence', 'fabricTypeDisplay', 'location', 'oi', 'lr'],
             'k5-tab': ['sequence', 'fabricTypeDisplay'],
         };
 
