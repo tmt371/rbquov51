@@ -35,6 +35,11 @@ export class UIManager {
         this.k3OiButton = document.getElementById('btn-batch-cycle-oi');
         this.k3LrButton = document.getElementById('btn-batch-cycle-lr');
         
+        // K4 Panel
+        this.k4DualButton = document.getElementById('btn-k4-dual');
+        this.k4ChainButton = document.getElementById('btn-k4-chain');
+        this.k4DualPriceValue = document.querySelector('#k4-dual-price-display .price-value');
+
         this.tabButtons = document.querySelectorAll('.tab-button');
         this.tabContents = document.querySelectorAll('.tab-content');
 
@@ -114,7 +119,7 @@ export class UIManager {
     }
 
     _updatePanelButtonStates(state) {
-        const { activeEditMode, locationInputValue, lfModifiedRowIndexes } = state.ui;
+        const { activeEditMode, locationInputValue, lfModifiedRowIndexes, k4ActiveMode, k4DualPrice } = state.ui;
         const { rollerBlindItems } = state.quoteData;
 
         // --- K1 Location Input State ---
@@ -156,6 +161,24 @@ export class UIManager {
         if (this.k3OverButton) this.k3OverButton.disabled = k3SubButtonsDisabled;
         if (this.k3OiButton) this.k3OiButton.disabled = k3SubButtonsDisabled;
         if (this.k3LrButton) this.k3LrButton.disabled = k3SubButtonsDisabled;
+
+        // --- K4 Button Active/Disabled States ---
+        if (this.k4DualButton) {
+            this.k4DualButton.classList.toggle('active', k4ActiveMode === 'dual');
+            this.k4DualButton.classList.toggle('disabled-by-mode', k4ActiveMode !== null && k4ActiveMode !== 'dual');
+        }
+        if (this.k4ChainButton) {
+            this.k4ChainButton.classList.toggle('active', k4ActiveMode === 'chain');
+            this.k4ChainButton.classList.toggle('disabled-by-mode', k4ActiveMode !== null && k4ActiveMode !== 'chain');
+        }
+
+        // --- K4 Price Display ---
+        if (this.k4DualPriceValue) {
+            const newText = (typeof k4DualPrice === 'number') ? `$${k4DualPrice.toFixed(2)}` : '';
+            if (this.k4DualPriceValue.textContent !== newText) {
+                this.k4DualPriceValue.textContent = newText;
+            }
+        }
     }
 
     _adjustLeftPanelLayout() {

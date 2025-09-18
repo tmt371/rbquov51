@@ -58,4 +58,17 @@ export class CalculationService {
 
         return { updatedQuoteData, firstError };
     }
+
+    /**
+     * [NEW] Calculates the total price for Dual brackets.
+     * @param {Array<object>} items - The list of roller blind items.
+     * @returns {number} The total price for dual brackets.
+     */
+    calculateDualPrice(items) {
+        const dualCount = items.filter(item => item.dual === 'D').length;
+        const pricePerPair = 15;
+        // Every 2 'D's cost $15. Use Math.floor to ignore single odd 'D'.
+        const totalPrice = Math.floor(dualCount / 2) * pricePerPair;
+        return totalPrice;
+    }
 }

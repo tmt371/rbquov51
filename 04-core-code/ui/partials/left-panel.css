@@ -189,3 +189,48 @@
     background-color: #ffccd5; /* Light Pink */
     box-shadow: inset 0 0 0 1px #e5a0aa;
 }
+
+/* --- [NEW] K4 Panel Styles --- */
+.k4-top-row {
+    display: flex;
+    justify-content: flex-end; /* Aligns the input box to the right */
+}
+.k4-bottom-row {
+    display: flex;
+    justify-content: space-between; /* Positions price boxes at opposite ends */
+    align-items: center;
+}
+#k4-input-display {
+    width: 150px; /* A reasonable default width */
+    text-align: right;
+    background-color: #e9ecef;
+}
+#k4-input-display.active {
+    background-color: #fffacd; /* Yellow highlight when active */
+}
+.k4-price-box {
+    border: 1px solid black;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background-color: #fff;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 120px;
+}
+.k4-price-box .price-label {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #4b5563;
+}
+.k4-price-box .price-value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+
+/* --- [NEW] K4 Feature Styles for Main Table --- */
+.results-table td.dual-cell-active {
+    background-color: #cffde1; /* Mint Green */
+}

@@ -4,13 +4,37 @@
  * @fileoverview View module responsible for all logic related to the Detail Configuration screen.
  */
 export class DetailConfigView {
-    constructor({ quoteService, uiService, eventAggregator, publishStateChangeCallback }) {
+    constructor({ quoteService, uiService, calculationService, eventAggregator, publishStateChangeCallback }) {
         this.quoteService = quoteService;
         this.uiService = uiService;
+        this.calculationService = calculationService;
         this.eventAggregator = eventAggregator;
         this.publish = publishStateChangeCallback;
 
+        this.eventAggregator.subscribe('k4ModeChanged', (data) => this.handleK4ModeChange(data));
         console.log("DetailConfigView Initialized (Pure Logic View).");
+    }
+
+    handleK4ModeChange({ mode }) {
+        const currentMode = this.uiService.getState().k4ActiveMode;
+
+        // --- Pricing Logic on Mode Deactivation ---
+        if (currentMode === 'dual') {
+            const items = this.quoteService.getItems();
+            const price = this.calculationService.calculateDualPrice(items);
+            this.uiService.setK4DualPrice(price);
+        }
+
+        // --- Toggle Mode ---
+        const newMode = currentMode === mode ? null : mode;
+        this.uiService.setK4ActiveMode(newMode);
+
+        // --- Clear Prices when Entering a Mode ---
+        if (newMode === 'dual') {
+            this.uiService.setK4DualPrice(null);
+        }
+
+        this.publish();
     }
 
     handleFocusModeRequest({ column }) {
@@ -189,11 +213,12 @@ export class DetailConfigView {
     }
 
     handleTableCellClick({ rowIndex, column }) {
-        const { activeEditMode } = this.uiService.getState();
+        const { activeEditMode, k4ActiveMode } = this.uiService.getState();
+        const item = this.quoteService.getItems()[rowIndex];
+        if (!item) return;
 
-        if (activeEditMode !== 'K3') return;
-
-        if (['over', 'oi', 'lr'].includes(column)) {
+        // K3 Mode Logic
+        if (activeEditMode === 'K3' && ['over', 'oi', 'lr'].includes(column)) {
             this.uiService.setActiveCell(rowIndex, column);
             this.quoteService.cycleK3Property(rowIndex, column);
             this.publish();
@@ -202,6 +227,19 @@ export class DetailConfigView {
                 this.uiService.setActiveCell(null, null);
                 this.publish();
             }, 150);
+        }
+
+        // K4 Mode Logic
+        if (k4ActiveMode === 'dual' && column === 'dual') {
+            const newValue = item.dual === 'D' ? '' : 'D';
+            this.quoteService.updateItemProperty(rowIndex, 'dual', newValue);
+            this.publish();
+        }
+
+        if (k4ActiveMode === 'chain' && column === 'chain') {
+            // Logic for chain will be implemented here
+            this.eventAggregator.publish('showNotification', { message: 'Chain input logic to be implemented.'});
+            this.publish();
         }
     }
 

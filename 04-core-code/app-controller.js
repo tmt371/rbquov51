@@ -99,7 +99,7 @@ export class AppController {
             'k1-tab': ['sequence', 'fabricTypeDisplay', 'location'],
             'k2-tab': ['sequence', 'fabricTypeDisplay', 'fabric', 'color'],
             'k3-tab': ['sequence', 'fabricTypeDisplay', 'location', 'over', 'oi', 'lr'],
-            'k4-tab': ['sequence', 'fabricTypeDisplay', 'location', 'oi', 'lr'],
+            'k4-tab': ['sequence', 'fabricTypeDisplay', 'location', 'dual', 'chain'],
             'k5-tab': ['sequence', 'fabricTypeDisplay'],
         };
 
@@ -129,7 +129,7 @@ export class AppController {
         if (result.success) {
             this.quoteService.quoteData = result.data;
             this.uiService.reset(initialState.ui);
-            this.uiService.setSumOutdated(true);
+            this.ui.setSumOutdated(true);
             this._publishStateChange();
             this.eventAggregator.publish('showNotification', { message: result.message });
         } else {
