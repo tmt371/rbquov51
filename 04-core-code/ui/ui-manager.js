@@ -92,15 +92,17 @@ export class UIManager {
     }
 
     _updateTabStates(uiState) {
-        const { activeEditMode, activeTabId } = uiState;
-        const isInEditMode = activeEditMode !== null;
+        const { activeEditMode, activeTabId, k4ActiveMode } = uiState;
+        // [FIX] Also consider k4ActiveMode to determine if in an edit mode
+        const isInEditMode = activeEditMode !== null || k4ActiveMode !== null;
 
         const activeTabButton = document.getElementById(activeTabId);
         const activeContentTarget = activeTabButton ? activeTabButton.dataset.tabTarget : null;
 
         this.tabButtons.forEach(button => {
             button.classList.toggle('active', button.id === activeTabId);
-            button.disabled = isInEditMode;
+            // Disable other tabs if the current tab is the active one AND we are in an edit mode
+            button.disabled = isInEditMode && button.id !== activeTabId;
         });
 
         this.tabContents.forEach(content => {

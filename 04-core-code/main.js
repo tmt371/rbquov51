@@ -79,6 +79,7 @@ class App {
         const detailConfigView = new DetailConfigView({
             quoteService,
             uiService,
+            calculationService, // [FIX] Pass the calculationService instance
             eventAggregator: this.eventAggregator,
             publishStateChangeCallback
         });
