@@ -19,9 +19,18 @@ export class DetailConfigView {
     handleK4ModeChange({ mode }) {
         const currentMode = this.uiService.getState().k4ActiveMode;
 
-        // --- Pricing Logic on Mode Deactivation ---
+        // --- [NEW] Validation Logic on Mode Deactivation ---
         if (currentMode === 'dual') {
             const items = this.quoteService.getItems();
+            const dualCount = items.filter(item => item.dual === 'D').length;
+            if (dualCount % 2 !== 0) {
+                this.eventAggregator.publish('showNotification', {
+                    message: '雙層支架(D)的總數必須為偶數，請修正後再退出。',
+                    type: 'error'
+                });
+                return; // Prevent exiting the mode
+            }
+            // --- Pricing Logic on Mode Deactivation ---
             const price = this.calculationService.calculateDualPrice(items);
             this.uiService.setK4DualPrice(price);
         }
@@ -51,8 +60,20 @@ export class DetailConfigView {
         switch (key) {
             case 'ENT': {
                 const { chainInputValue, targetCell: currentTarget } = this.uiService.getState();
-                const valueToSave = chainInputValue === '' ? null : parseInt(chainInputValue, 10);
                 
+                // --- [NEW] Validation Logic ---
+                const valueAsNumber = Number(chainInputValue);
+                if (chainInputValue !== '' && (!Number.isInteger(valueAsNumber) || valueAsNumber <= 0)) {
+                    this.eventAggregator.publish('showNotification', {
+                        message: '僅能輸入正整數。',
+                        type: 'error'
+                    });
+                    this.uiService.clearChainInputValue();
+                    this.publish();
+                    return; // Prevent saving invalid data
+                }
+
+                const valueToSave = chainInputValue === '' ? null : valueAsNumber;
                 this.quoteService.updateItemProperty(currentTarget.rowIndex, currentTarget.column, valueToSave);
                 
                 // Clear state after submission
@@ -61,7 +82,7 @@ export class DetailConfigView {
                 break;
             }
             case 'DEL':
-                this.uiService.deleteLastChainInputChar();
+                this.uiService.deleteLastCharChainInput();
                 break;
             default: // Should be a numeric key
                 if (!isNaN(parseInt(key, 10))) {
@@ -276,12 +297,12 @@ export class DetailConfigView {
             this.uiService.setChainInputValue(item.chain || '');
             this.publish();
 
-            // Use setTimeout to ensure the element is enabled before focusing
+            // [FIX] Use a slightly longer delay to robustly ensure the element is focusable
             setTimeout(() => {
                 const inputBox = document.getElementById('k4-input-display');
                 inputBox?.focus();
                 inputBox?.select();
-            }, 50); // Increased delay slightly for robustness
+            }, 100);
         }
     }
 
