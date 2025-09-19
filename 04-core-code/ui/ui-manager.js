@@ -36,6 +36,7 @@ export class UIManager {
         this.k3LrButton = document.getElementById('btn-batch-cycle-lr');
         
         // K4 Panel
+        this.k4InputDisplay = document.getElementById('k4-input-display');
         this.k4DualButton = document.getElementById('btn-k4-dual');
         this.k4ChainButton = document.getElementById('btn-k4-chain');
         this.k4DualPriceValue = document.querySelector('#k4-dual-price-display .price-value');
@@ -101,7 +102,7 @@ export class UIManager {
 
         this.tabButtons.forEach(button => {
             button.classList.toggle('active', button.id === activeTabId);
-            // Disable other tabs if the current tab is the active one AND we are in an edit mode
+            // Disable other tabs if we are in an edit mode, but not the active tab itself
             button.disabled = isInEditMode && button.id !== activeTabId;
         });
 
@@ -121,7 +122,7 @@ export class UIManager {
     }
 
     _updatePanelButtonStates(state) {
-        const { activeEditMode, locationInputValue, lfModifiedRowIndexes, k4ActiveMode, k4DualPrice } = state.ui;
+        const { activeEditMode, locationInputValue, lfModifiedRowIndexes, k4ActiveMode, k4DualPrice, targetCell, chainInputValue } = state.ui;
         const { rollerBlindItems } = state.quoteData;
 
         // --- K1 Location Input State ---
@@ -166,15 +167,28 @@ export class UIManager {
 
         // --- K4 Button Active/Disabled States ---
         if (this.k4DualButton) {
+            const isDisabled = k4ActiveMode !== null && k4ActiveMode !== 'dual';
             this.k4DualButton.classList.toggle('active', k4ActiveMode === 'dual');
-            this.k4DualButton.classList.toggle('disabled-by-mode', k4ActiveMode !== null && k4ActiveMode !== 'dual');
+            this.k4DualButton.classList.toggle('disabled-by-mode', isDisabled);
+            this.k4DualButton.disabled = isDisabled;
         }
         if (this.k4ChainButton) {
+            const isDisabled = k4ActiveMode !== null && k4ActiveMode !== 'chain';
             this.k4ChainButton.classList.toggle('active', k4ActiveMode === 'chain');
-            this.k4ChainButton.classList.toggle('disabled-by-mode', k4ActiveMode !== null && k4ActiveMode !== 'chain');
+            this.k4ChainButton.classList.toggle('disabled-by-mode', isDisabled);
+            this.k4ChainButton.disabled = isDisabled;
         }
-
-        // --- K4 Price Display ---
+        
+        // --- K4 Input and Price Display ---
+        if (this.k4InputDisplay) {
+            const isChainInputActive = k4ActiveMode === 'chain' && targetCell && targetCell.column === 'chain';
+            this.k4InputDisplay.readOnly = !isChainInputActive;
+            this.k4InputDisplay.classList.toggle('active', isChainInputActive);
+            // Sync value from state to display
+            if (this.k4InputDisplay.value !== chainInputValue) {
+                this.k4InputDisplay.value = chainInputValue;
+            }
+        }
         if (this.k4DualPriceValue) {
             const newText = (typeof k4DualPrice === 'number') ? `$${k4DualPrice.toFixed(2)}` : '';
             if (this.k4DualPriceValue.textContent !== newText) {

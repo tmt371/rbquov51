@@ -33,6 +33,11 @@ export class DetailConfigView {
         if (newMode === 'dual') {
             this.uiService.setK4DualPrice(null);
         }
+        
+        // When exiting any K4 mode, clear the target cell
+        if (!newMode) {
+            this.uiService.setTargetCell(null);
+        }
 
         this.publish();
     }
@@ -237,9 +242,16 @@ export class DetailConfigView {
         }
 
         if (k4ActiveMode === 'chain' && column === 'chain') {
-            // Logic for chain will be implemented here
-            this.eventAggregator.publish('showNotification', { message: 'Chain input logic to be implemented.'});
+            this.uiService.setTargetCell({ rowIndex, column: 'chain' });
+            this.uiService.setChainInputValue(item.chain || '');
             this.publish();
+
+            // Use setTimeout to ensure the element is enabled before focusing
+            setTimeout(() => {
+                const inputBox = document.getElementById('k4-input-display');
+                inputBox?.focus();
+                inputBox?.select();
+            }, 0);
         }
     }
 
