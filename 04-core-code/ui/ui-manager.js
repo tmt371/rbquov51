@@ -94,7 +94,6 @@ export class UIManager {
 
     _updateTabStates(uiState) {
         const { activeEditMode, activeTabId, k4ActiveMode } = uiState;
-        // [FIX] Also consider k4ActiveMode to determine if in an edit mode
         const isInEditMode = activeEditMode !== null || k4ActiveMode !== null;
 
         const activeTabButton = document.getElementById(activeTabId);
@@ -102,7 +101,6 @@ export class UIManager {
 
         this.tabButtons.forEach(button => {
             button.classList.toggle('active', button.id === activeTabId);
-            // Disable other tabs if we are in an edit mode, but not the active tab itself
             button.disabled = isInEditMode && button.id !== activeTabId;
         });
 
@@ -182,7 +180,7 @@ export class UIManager {
         // --- K4 Input and Price Display ---
         if (this.k4InputDisplay) {
             const isChainInputActive = k4ActiveMode === 'chain' && targetCell && targetCell.column === 'chain';
-            this.k4InputDisplay.readOnly = !isChainInputActive;
+            this.k4InputDisplay.disabled = !isChainInputActive; // [FIX] Use 'disabled' property, not 'readOnly'
             this.k4InputDisplay.classList.toggle('active', isChainInputActive);
             // Sync value from state to display
             if (this.k4InputDisplay.value !== chainInputValue) {
@@ -225,7 +223,6 @@ export class UIManager {
                 this._adjustLeftPanelLayout();
             }
         });
-        // [FIX] Restore initial layout calculation to ensure panel has height/position on load
         this._adjustLeftPanelLayout();
     }
     
@@ -237,8 +234,6 @@ export class UIManager {
             if (isExpanded) {
                 this._adjustLeftPanelLayout();
             } else {
-                // [FIX] Only clear 'left' style. Preserve height/top/width.
-                // This fixes the desktop artifact bug without deleting the panel.
                 this.leftPanel.style.left = '';
             }
         }
