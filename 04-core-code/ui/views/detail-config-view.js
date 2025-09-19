@@ -12,6 +12,7 @@ export class DetailConfigView {
         this.publish = publishStateChangeCallback;
 
         this.eventAggregator.subscribe('k4ModeChanged', (data) => this.handleK4ModeChange(data));
+        this.eventAggregator.subscribe('numericKeyPressed', (data) => this.handleK4NumericInput(data));
         console.log("DetailConfigView Initialized (Pure Logic View).");
     }
 
@@ -34,11 +35,40 @@ export class DetailConfigView {
             this.uiService.setK4DualPrice(null);
         }
         
-        // When exiting any K4 mode, clear the target cell
+        // When exiting any K4 mode, clear the target cell and input value
         if (!newMode) {
             this.uiService.setTargetCell(null);
+            this.uiService.clearChainInputValue();
         }
 
+        this.publish();
+    }
+
+    handleK4NumericInput({ key }) {
+        const { k4ActiveMode, targetCell } = this.uiService.getState();
+        if (k4ActiveMode !== 'chain' || !targetCell) return;
+
+        switch (key) {
+            case 'ENT': {
+                const { chainInputValue, targetCell: currentTarget } = this.uiService.getState();
+                const valueToSave = chainInputValue === '' ? null : parseInt(chainInputValue, 10);
+                
+                this.quoteService.updateItemProperty(currentTarget.rowIndex, currentTarget.column, valueToSave);
+                
+                // Clear state after submission
+                this.uiService.setTargetCell(null);
+                this.uiService.clearChainInputValue();
+                break;
+            }
+            case 'DEL':
+                this.uiService.deleteLastChainInputChar();
+                break;
+            default: // Should be a numeric key
+                if (!isNaN(parseInt(key, 10))) {
+                    this.uiService.appendChainInputValue(key);
+                }
+                break;
+        }
         this.publish();
     }
 
@@ -251,7 +281,7 @@ export class DetailConfigView {
                 const inputBox = document.getElementById('k4-input-display');
                 inputBox?.focus();
                 inputBox?.select();
-            }, 0);
+            }, 50); // Increased delay slightly for robustness
         }
     }
 

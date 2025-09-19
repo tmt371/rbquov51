@@ -81,7 +81,7 @@ export class InputHandler {
         setupBatchCycleButton('btn-batch-cycle-oi', 'oi');
         setupBatchCycleButton('btn-batch-cycle-lr', 'lr');
 
-        // --- [NEW] K4 Button Listeners ---
+        // --- K4 Button Listeners ---
         const setupK4Button = (buttonId, mode) => {
             const button = document.getElementById(buttonId);
             if (button) {
@@ -136,11 +136,24 @@ export class InputHandler {
                 }
             });
         }
+
+        // --- [NEW] K4 Input Box Listener ---
+        const k4Input = document.getElementById('k4-input-display');
+        if (k4Input) {
+            k4Input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    // Reuse the existing numeric keypress event for submission
+                    this.eventAggregator.publish('numericKeyPressed', { key: 'ENT' });
+                }
+            });
+        }
     }
 
     _setupPhysicalKeyboard() {
         window.addEventListener('keydown', (event) => {
-            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+            // Check if the focus is on an input where typing should be allowed
+            if (event.target.matches('input[type="text"]:not([readonly])')) {
                 return;
             }
             
