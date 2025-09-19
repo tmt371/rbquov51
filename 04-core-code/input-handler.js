@@ -137,14 +137,15 @@ export class InputHandler {
             });
         }
 
-        // --- [NEW] K4 Input Box Listener ---
+        // --- [NEW] K4 Input Box Listener (imitating K1's locationInput) ---
         const k4Input = document.getElementById('k4-input-display');
         if (k4Input) {
             k4Input.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    // Reuse the existing numeric keypress event for submission
-                    this.eventAggregator.publish('numericKeyPressed', { key: 'ENT' });
+                    this.eventAggregator.publish('k4ChainEnterPressed', {
+                        value: event.target.value
+                    });
                 }
             });
         }
@@ -152,7 +153,7 @@ export class InputHandler {
 
     _setupPhysicalKeyboard() {
         window.addEventListener('keydown', (event) => {
-            // Check if the focus is on an input where typing should be allowed
+            // [FIX] If focus is on any text input that is NOT readonly, let the browser handle it.
             if (event.target.matches('input[type="text"]:not([readonly])')) {
                 return;
             }

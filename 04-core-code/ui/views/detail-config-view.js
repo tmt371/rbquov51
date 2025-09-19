@@ -12,14 +12,14 @@ export class DetailConfigView {
         this.publish = publishStateChangeCallback;
 
         this.eventAggregator.subscribe('k4ModeChanged', (data) => this.handleK4ModeChange(data));
-        this.eventAggregator.subscribe('numericKeyPressed', (data) => this.handleK4NumericInput(data));
+        this.eventAggregator.subscribe('k4ChainEnterPressed', (data) => this.handleK4ChainEnterPressed(data));
         console.log("DetailConfigView Initialized (Pure Logic View).");
     }
 
     handleK4ModeChange({ mode }) {
         const currentMode = this.uiService.getState().k4ActiveMode;
 
-        // --- [NEW] Validation Logic on Mode Deactivation ---
+        // --- Validation Logic on Mode Deactivation ---
         if (currentMode === 'dual') {
             const items = this.quoteService.getItems();
             const dualCount = items.filter(item => item.dual === 'D').length;
@@ -53,43 +53,27 @@ export class DetailConfigView {
         this.publish();
     }
 
-    handleK4NumericInput({ key }) {
-        const { k4ActiveMode, targetCell } = this.uiService.getState();
-        if (k4ActiveMode !== 'chain' || !targetCell) return;
+    handleK4ChainEnterPressed({ value }) {
+        const { targetCell: currentTarget } = this.uiService.getState();
+        if (!currentTarget) return;
 
-        switch (key) {
-            case 'ENT': {
-                const { chainInputValue, targetCell: currentTarget } = this.uiService.getState();
-                
-                // --- [NEW] Validation Logic ---
-                const valueAsNumber = Number(chainInputValue);
-                if (chainInputValue !== '' && (!Number.isInteger(valueAsNumber) || valueAsNumber <= 0)) {
-                    this.eventAggregator.publish('showNotification', {
-                        message: '僅能輸入正整數。',
-                        type: 'error'
-                    });
-                    this.uiService.clearChainInputValue();
-                    this.publish();
-                    return; // Prevent saving invalid data
-                }
-
-                const valueToSave = chainInputValue === '' ? null : valueAsNumber;
-                this.quoteService.updateItemProperty(currentTarget.rowIndex, currentTarget.column, valueToSave);
-                
-                // Clear state after submission
-                this.uiService.setTargetCell(null);
-                this.uiService.clearChainInputValue();
-                break;
-            }
-            case 'DEL':
-                this.uiService.deleteLastCharChainInput();
-                break;
-            default: // Should be a numeric key
-                if (!isNaN(parseInt(key, 10))) {
-                    this.uiService.appendChainInputValue(key);
-                }
-                break;
+        // --- Validation Logic ---
+        const valueAsNumber = Number(value);
+        if (value !== '' && (!Number.isInteger(valueAsNumber) || valueAsNumber <= 0)) {
+            this.eventAggregator.publish('showNotification', {
+                message: '僅能輸入正整數。',
+                type: 'error'
+            });
+            // Do not clear the input, let the user fix it
+            return;
         }
+
+        const valueToSave = value === '' ? null : valueAsNumber;
+        this.quoteService.updateItemProperty(currentTarget.rowIndex, currentTarget.column, valueToSave);
+        
+        // Clear state after submission to exit editing for that cell
+        this.uiService.setTargetCell(null);
+        this.uiService.clearChainInputValue();
         this.publish();
     }
 
@@ -297,12 +281,12 @@ export class DetailConfigView {
             this.uiService.setChainInputValue(item.chain || '');
             this.publish();
 
-            // [FIX] Use a slightly longer delay to robustly ensure the element is focusable
+            // Use setTimeout to ensure the element is enabled and visible before focusing
             setTimeout(() => {
                 const inputBox = document.getElementById('k4-input-display');
                 inputBox?.focus();
                 inputBox?.select();
-            }, 100);
+            }, 50); 
         }
     }
 
